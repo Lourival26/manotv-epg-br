@@ -1,0 +1,27 @@
+name: Update EPG ManoTV Brasil
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # Roda todo dia às 6h UTC = 3h da manhã BR
+  workflow_dispatch:     # Botão pra rodar manual
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - run: python merge_epg.py
+      - name: Commit EPG
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add -A
+          git diff-index --quiet HEAD || git commit -m "Update EPG Brasil"
+          git push
